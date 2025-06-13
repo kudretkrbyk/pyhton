@@ -28,40 +28,38 @@ client = OpenAI(
 
 # Agent sistemi
 SYSTEM_PROMPT = """
-Sen bir görev yöneticisi asistansın. Kullanıcının verdiği doğal dil girdisini analiz et ve sadece geçerli bir JSON üret.
-
-FORMAT (her zaman bu şekilde olmalı):
+Sen bir görev yöneticisi agentsın. Kullanıcıdan gelen doğal dili yorumla ve SADECE AŞAĞIDAKİ MCP FORMATINDA bir yanıt üret:
 
 {
-  "tool": "add_task" | "delete_task" | "list_tasks",
-  "parameters": {
-    "task": "<görev açıklaması>" // sadece add_task veya delete_task için
+  "name": "add_task" | "delete_task" | "list_tasks",
+  "arguments": {
+    "task": "<görev açıklaması>" // sadece add_task ve delete_task için
   }
 }
 
 KURALLAR:
-- Yanıt sadece geçerli JSON olmalı. JSON dışında hiçbir açıklama, mesaj, yorum, metin yazma.
-- Markdown, kod bloğu (```), yazı açıklaması kullanma.
-- Yanıt yalnızca { ile başlayıp } ile bitmeli.
-- 'list_tasks' durumunda "parameters" alanı boş nesne olmalı: {}
+- Yalnızca geçerli bir JSON nesnesi döndür.
+- Yanıtta açıklama, yorum, markdown veya metin kullanma.
+- list_tasks komutu için "arguments" boş olmalı: {}
 
 ÖRNEK:
 
 {
-  "tool": "add_task",
-  "parameters": {
-    "task": "Eşimin doğum günü 24.08.1991"
+  "name": "add_task",
+  "arguments": {
+    "task": "Annemin doğum günü 24.08.1991"
   }
 }
 """
 
 
 
+
 # Araçları haritalayan sözlük
 TOOL_MAP = {
-    "add_task": lambda params: add_task(params["task"]),
-    "delete_task": lambda params: delete_task(params["task"]),
-    "list_tasks": lambda params: list_tasks()
+    "add_task": lambda args: add_task(args["task"]),
+    "delete_task": lambda args: delete_task(args["task"]),
+    "list_tasks": lambda args: list_tasks()
 }
 
 # Ana LLM çağrısı ve yönlendirme
@@ -75,23 +73,22 @@ def run_agent(user_input):
     )
 
     content_raw = response.choices[0].message.content.strip()
-    content_clean = extract_first_json_block(content_raw)
+    content_clean = extract_first_json_block(content_raw)  # JSON dışı metinleri ayıkla
 
     print("🧠 LLM Yanıtı:", content_clean)
 
     try:
         parsed = json.loads(content_clean)
-        tool = parsed["tool"]
-        parameters = parsed.get("parameters", {})
+        tool_name = parsed["name"]
+        arguments = parsed.get("arguments", {})
 
-        if tool in TOOL_MAP:
-            result = TOOL_MAP[tool](parameters)
+        if tool_name in TOOL_MAP:
+            result = TOOL_MAP[tool_name](arguments)
             print(result)
         else:
-            print("❌ Bilinmeyen araç:", tool)
+            print("❌ Bilinmeyen araç:", tool_name)
     except Exception as e:
         print("❌ JSON çözümlenemedi:", e)
-
 
 # Giriş döngüsü
 if __name__ == "__main__":

@@ -1,0 +1,9 @@
+{
+  "name": "Görev Asistanı",
+  "description": "Görev ekleme, silme ve listeleme yapan bir ajandır.",
+  "tools": "./tools.json",
+  "api": {
+    "type": "openai",
+    "url": "http://localhost:5000"
+  }
+}

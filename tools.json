@@ -1,0 +1,38 @@
+[
+  {
+    "name": "add_task",
+    "description": "Yeni bir görev ekler",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "Eklenecek görev metni"
+        }
+      },
+      "required": ["task"]
+    }
+  },
+  {
+    "name": "delete_task",
+    "description": "Bir görevi siler",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "Silinecek görev metni"
+        }
+      },
+      "required": ["task"]
+    }
+  },
+  {
+    "name": "list_tasks",
+    "description": "Tüm görevleri listeler",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  }
+]
